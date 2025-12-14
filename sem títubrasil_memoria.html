@@ -1,0 +1,1949 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brasil Memória - Aprende Portugués</title>
+    
+    <!-- ==================== -->
+    <!-- METADATOS PARA PWA -->
+    <!-- ==================== -->
+    <meta name="theme-color" content="#009c3b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Brasil Memória">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Brasil Memória">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🇧🇷</text></svg>">
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🇧🇷</text></svg>">
+    
+    <!-- Open Graph para compartir -->
+    <meta property="og:title" content="Brasil Memória - Aprende Portugués">
+    <meta property="og:description" content="Juego educativo para aprender portugués brasileño jugando">
+    <meta property="og:image" content="https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f1e7-1f1f7.png">
+    <meta property="og:url" content="https://brasil-memoria.com">
+    
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Brasil Memória">
+    <meta name="twitter:description" content="Aprende portugués jugando">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #009c3b; /* Verde de la bandera de Brasil */
+            --secondary: #ffdf00; /* Amarillo de Brasil */
+            --accent: #002776; /* Azul de Brasil */
+            --light: #f5f5f5;
+            --dark: #333;
+            --correct: #4CAF50;
+            --wrong: #f44336;
+            --card-front: #ffffff;
+            --card-back: #ffdf00;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--accent), var(--primary));
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        
+        /* Botón de Instalación */
+        .install-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--secondary);
+            color: var(--accent);
+            border: none;
+            border-radius: 50px;
+            padding: 15px 25px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: transform 0.3s;
+        }
+        
+        .install-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .install-btn.hidden {
+            display: none;
+        }
+        
+        /* Banner de Instalación */
+        .install-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 999;
+            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .install-banner.active {
+            display: flex;
+        }
+        
+        .banner-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .banner-icon {
+            font-size: 2rem;
+        }
+        
+        .banner-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .banner-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .banner-install {
+            background: var(--secondary);
+            color: var(--accent);
+        }
+        
+        .banner-cancel {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+        
+        /* Ajustes para dispositivos móviles */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .install-btn {
+                bottom: 70px;
+                padding: 12px 20px;
+                font-size: 14px;
+            }
+        }
+        
+        /* Resto del CSS se mantiene igual */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .logo i {
+            font-size: 2.5rem;
+            color: var(--secondary);
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .main-nav {
+            background-color: var(--light);
+            padding: 15px;
+            border-bottom: 3px solid var(--secondary);
+        }
+        
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .nav-btn {
+            padding: 10px 20px;
+            background: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--accent);
+            border: 2px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .nav-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-btn.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--secondary);
+        }
+        
+        .screen {
+            display: none;
+            padding: 30px;
+            min-height: 500px;
+        }
+        
+        .screen.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .welcome-screen {
+            text-align: center;
+        }
+        
+        .welcome-icon {
+            font-size: 5rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+        
+        .welcome-text {
+            max-width: 600px;
+            margin: 0 auto 30px;
+        }
+        
+        .welcome-text h2 {
+            color: var(--accent);
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+        }
+        
+        .mode-selector {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .mode-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            width: 250px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .mode-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--secondary);
+        }
+        
+        .mode-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        
+        .mode-card h3 {
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+        
+        .categories-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .category-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .category-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+        
+        .category-card.locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .category-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        
+        .category-info {
+            margin-top: 10px;
+        }
+        
+        .category-status {
+            display: inline-block;
+            padding: 5px 10px;
+            background-color: var(--light);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+        
+        .levels-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .level-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .level-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .level-card.locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .level-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .level-difficulty {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin: 10px 0;
+        }
+        
+        .difficulty-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #ddd;
+        }
+        
+        .difficulty-dot.active {
+            background-color: var(--secondary);
+        }
+        
+        .level-stars {
+            color: var(--secondary);
+            margin-top: 10px;
+        }
+        
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light);
+        }
+        
+        .game-stats {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .stat {
+            text-align: center;
+            background-color: var(--light);
+            padding: 10px 15px;
+            border-radius: 10px;
+            min-width: 100px;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .game-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .control-btn {
+            padding: 10px 20px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .control-btn:hover {
+            background-color: var(--accent);
+        }
+        
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin: 0 auto;
+            max-width: 800px;
+        }
+        
+        .board-8 { grid-template-columns: repeat(4, 1fr); }
+        .board-12 { grid-template-columns: repeat(4, 1fr); }
+        .board-16 { grid-template-columns: repeat(4, 1fr); }
+        
+        .card {
+            aspect-ratio: 3/4;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+        
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+        
+        .card.matched .card-inner {
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+        
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+        }
+        
+        .card-front {
+            background-color: var(--card-front);
+            border: 3px solid var(--primary);
+        }
+        
+        .card-back {
+            background-color: var(--card-back);
+            transform: rotateY(180deg);
+            border: 3px solid var(--accent);
+        }
+        
+        .card-image {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        
+        .card-word {
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        .card-translation {
+            font-size: 1.1rem;
+            color: var(--accent);
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .card-audio {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .card-audio:hover {
+            background-color: var(--accent);
+        }
+        
+        .results-container {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .results-icon {
+            font-size: 5rem;
+            color: var(--secondary);
+            margin-bottom: 20px;
+        }
+        
+        .results-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 30px 0;
+        }
+        
+        .result-stat {
+            background-color: var(--light);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .stars-earned {
+            color: var(--secondary);
+            font-size: 2rem;
+            margin: 20px 0;
+        }
+        
+        .results-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .journey-map {
+            position: relative;
+            margin: 30px auto;
+            max-width: 800px;
+            height: 300px;
+            background: linear-gradient(to bottom, #87CEEB, #E0F7FA);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 5px solid var(--secondary);
+        }
+        
+        .journey-point {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid var(--primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+        
+        .journey-point:hover {
+            transform: scale(1.1);
+            border-color: var(--secondary);
+        }
+        
+        .journey-point.active {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .journey-point.locked {
+            background-color: #ccc;
+            border-color: #999;
+            cursor: not-allowed;
+        }
+        
+        .journey-path {
+            position: absolute;
+            height: 5px;
+            background-color: var(--primary);
+            z-index: 1;
+        }
+        
+        footer {
+            background-color: var(--accent);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .game-board {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .board-8 { grid-template-columns: repeat(3, 1fr); }
+            .board-12 { grid-template-columns: repeat(4, 1fr); }
+            .board-16 { grid-template-columns: repeat(4, 1fr); }
+            
+            .game-stats {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .categories-container,
+            .levels-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .mode-selector {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .mode-card {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .nav-tabs {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .nav-btn {
+                width: 100%;
+                max-width: 250px;
+                justify-content: center;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .game-board {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .board-8 { grid-template-columns: repeat(2, 1fr); }
+            .board-12 { grid-template-columns: repeat(3, 1fr); }
+            .board-16 { grid-template-columns: repeat(4, 1fr); }
+            
+            .categories-container,
+            .levels-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .results-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Botón flotante de instalación -->
+    <button class="install-btn hidden" id="installButton">
+        <i class="fas fa-download"></i> Instalar App
+    </button>
+    
+    <!-- Banner de instalación -->
+    <div class="install-banner" id="installBanner">
+        <div class="banner-content">
+            <div class="banner-icon">🇧🇷</div>
+            <div>
+                <h3>¡Instala Brasil Memória!</h3>
+                <p>Juega sin internet y accede rápido desde tu pantalla de inicio</p>
+            </div>
+        </div>
+        <div class="banner-buttons">
+            <button class="banner-btn banner-install" id="bannerInstall">Instalar</button>
+            <button class="banner-btn banner-cancel" id="bannerCancel">Ahora no</button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-brain"></i>
+                <div>
+                    <h1>Brasil Memória</h1>
+                    <div class="subtitle">Aprende portugués jugando</div>
+                </div>
+            </div>
+        </header>
+        
+        <nav class="main-nav">
+            <div class="nav-tabs">
+                <button class="nav-btn active" data-screen="home">
+                    <i class="fas fa-home"></i> Inicio
+                </button>
+                <button class="nav-btn" data-screen="journey">
+                    <i class="fas fa-map-marked-alt"></i> Modo Viaje
+                </button>
+                <button class="nav-btn" data-screen="categories">
+                    <i class="fas fa-th-large"></i> Categorías
+                </button>
+                <button class="nav-btn" data-screen="stats">
+                    <i class="fas fa-chart-bar"></i> Estadísticas
+                </button>
+            </div>
+        </nav>
+        
+        <!-- Pantalla de Inicio -->
+        <section id="home-screen" class="screen active">
+            <div class="welcome-screen">
+                <div class="welcome-icon">
+                    <i class="fas fa-flag"></i>
+                </div>
+                
+                <div class="welcome-text">
+                    <h2>¡Bienvenido a Brasil Memória!</h2>
+                    <p>Aprende portugués brasileño de manera divertida con este juego de memoria. Empareja las palabras con sus imágenes y descubre la traducción al español.</p>
+                    <p>¡Comienza tu viaje de aprendizaje ahora!</p>
+                    
+                    <!-- Instrucciones para instalar -->
+                    <div style="background: var(--light); padding: 20px; border-radius: 15px; margin-top: 30px; text-align: left;">
+                        <h3 style="color: var(--accent); margin-bottom: 15px;">
+                            <i class="fas fa-mobile-alt"></i> Instala la App
+                        </h3>
+                        <p><strong>En Android/Chrome:</strong></p>
+                        <ol style="margin-left: 20px; margin-bottom: 15px;">
+                            <li>Toca el menú (3 puntos)</li>
+                            <li>Selecciona "Instalar app" o "Añadir a pantalla de inicio"</li>
+                            <li>¡Listo! La app aparecerá en tu menú</li>
+                        </ol>
+                        
+                        <p><strong>En iOS/Safari:</strong></p>
+                        <ol style="margin-left: 20px;">
+                            <li>Toca el botón compartir (cuadrado con flecha)</li>
+                            <li>Desplázate y selecciona "Añadir a pantalla de inicio"</li>
+                            <li>Presiona "Añadir"</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="mode-selector">
+                    <div class="mode-card" data-screen="journey">
+                        <div class="mode-icon">
+                            <i class="fas fa-map-marked-alt"></i>
+                        </div>
+                        <h3>Modo Viaje</h3>
+                        <p>Sigue una aventura progresiva por diferentes temas</p>
+                    </div>
+                    
+                    <div class="mode-card" data-screen="categories">
+                        <div class="mode-icon">
+                            <i class="fas fa-th-large"></i>
+                        </div>
+                        <h3>Modo Libre</h3>
+                        <p>Elige cualquier categoría y nivel para practicar</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Pantalla de Modo Viaje -->
+        <section id="journey-screen" class="screen">
+            <h2 style="text-align: center; color: var(--accent); margin-bottom: 20px;">
+                <i class="fas fa-map-marked-alt"></i> Modo Viaje
+            </h2>
+            <p style="text-align: center; margin-bottom: 30px; max-width: 800px; margin-left: auto; margin-right: auto;">
+                Completa cada etapa para desbloquear la siguiente. ¡Viaja a través de Brasil aprendiendo portugués!
+            </p>
+            
+            <div class="journey-map" id="journey-map">
+                <!-- Los puntos del viaje se generarán con JavaScript -->
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="control-btn" id="continue-journey">
+                    <i class="fas fa-play"></i> Continuar Viaje
+                </button>
+            </div>
+        </section>
+        
+        <!-- Pantalla de Categorías -->
+        <section id="categories-screen" class="screen">
+            <h2 style="color: var(--accent); margin-bottom: 20px;">
+                <i class="fas fa-th-large"></i> Elige una Categoría
+            </h2>
+            <p>Selecciona una categoría para empezar a jugar. Cada categoría tiene 3 niveles de dificultad.</p>
+            
+            <div class="categories-container" id="categories-container">
+                <!-- Las categorías se generarán con JavaScript -->
+            </div>
+        </section>
+        
+        <!-- Pantalla de Niveles -->
+        <section id="levels-screen" class="screen">
+            <h2 style="color: var(--accent); margin-bottom: 10px;" id="levels-title"></h2>
+            <p id="levels-description"></p>
+            
+            <div class="levels-container" id="levels-container">
+                <!-- Los niveles se generarán con JavaScript -->
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="control-btn" id="back-to-categories">
+                    <i class="fas fa-arrow-left"></i> Volver a Categorías
+                </button>
+            </div>
+        </section>
+        
+        <!-- Pantalla de Juego -->
+        <section id="game-screen" class="screen">
+            <div class="game-header">
+                <div class="game-stats">
+                    <div class="stat">
+                        <div class="stat-value" id="moves-counter">0</div>
+                        <div class="stat-label">Movimientos</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="matches-counter">0</div>
+                        <div class="stat-label">Aciertos</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="timer">00:00</div>
+                        <div class="stat-label">Tiempo</div>
+                    </div>
+                </div>
+                
+                <div class="game-controls">
+                    <button class="control-btn" id="hint-btn">
+                        <i class="fas fa-lightbulb"></i> Pista
+                    </button>
+                    <button class="control-btn" id="restart-btn">
+                        <i class="fas fa-redo"></i> Reiniciar
+                    </button>
+                    <button class="control-btn" id="quit-btn">
+                        <i class="fas fa-sign-out-alt"></i> Salir
+                    </button>
+                </div>
+            </div>
+            
+            <div class="game-board" id="game-board">
+                <!-- Las cartas se generarán con JavaScript -->
+            </div>
+        </section>
+        
+        <!-- Pantalla de Resultados -->
+        <section id="results-screen" class="screen">
+            <div class="results-container">
+                <div class="results-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                
+                <h2 style="color: var(--accent); margin-bottom: 10px;">¡Nivel Completado!</h2>
+                <p id="results-message"></p>
+                
+                <div class="results-stats">
+                    <div class="result-stat">
+                        <div class="stat-value" id="final-moves">0</div>
+                        <div class="stat-label">Movimientos</div>
+                    </div>
+                    <div class="result-stat">
+                        <div class="stat-value" id="final-time">00:00</div>
+                        <div class="stat-label">Tiempo</div>
+                    </div>
+                    <div class="result-stat">
+                        <div class="stat-value" id="final-score">0</div>
+                        <div class="stat-label">Puntuación</div>
+                    </div>
+                </div>
+                
+                <div class="stars-earned" id="stars-earned">
+                    <!-- Estrellas se generarán con JavaScript -->
+                </div>
+                
+                <div class="results-buttons">
+                    <button class="control-btn" id="play-again-btn">
+                        <i class="fas fa-redo"></i> Jugar Otra Vez
+                    </button>
+                    <button class="control-btn" id="next-level-btn">
+                        <i class="fas fa-forward"></i> Siguiente Nivel
+                    </button>
+                    <button class="control-btn" id="back-to-levels-btn">
+                        <i class="fas fa-list"></i> Volver a Niveles
+                    </button>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Pantalla de Estadísticas -->
+        <section id="stats-screen" class="screen">
+            <h2 style="color: var(--accent); margin-bottom: 20px;">
+                <i class="fas fa-chart-bar"></i> Tus Estadísticas
+            </h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                <div style="background-color: var(--light); padding: 20px; border-radius: 10px;">
+                    <h3 style="color: var(--primary); margin-bottom: 10px;">Progreso Total</h3>
+                    <div class="stat-value" id="total-words">0</div>
+                    <div class="stat-label">Palabras aprendidas</div>
+                </div>
+                
+                <div style="background-color: var(--light); padding: 20px; border-radius: 10px;">
+                    <h3 style="color: var(--primary); margin-bottom: 10px;">Niveles Completados</h3>
+                    <div class="stat-value" id="levels-completed">0</div>
+                    <div class="stat-label">de 15 niveles</div>
+                </div>
+                
+                <div style="background-color: var(--light); padding: 20px; border-radius: 10px;">
+                    <h3 style="color: var(--primary); margin-bottom: 10px;">Tiempo Total</h3>
+                    <div class="stat-value" id="total-time">00:00</div>
+                    <div class="stat-label">de aprendizaje</div>
+                </div>
+            </div>
+            
+            <h3 style="color: var(--accent); margin-bottom: 15px;">Progreso por Categoría</h3>
+            <div id="category-progress">
+                <!-- El progreso por categoría se generará con JavaScript -->
+            </div>
+        </section>
+        
+        <footer>
+            <p>Brasil Memória - Aprende portugués brasileño de forma divertida</p>
+            <p style="margin-top: 10px; font-size: 0.9rem;">
+                <i class="fas fa-volume-up"></i> Para escuchar la pronunciación, haz clic en el botón de audio en cada carta
+            </p>
+        </footer>
+    </div>
+
+    <!-- ==================== -->
+    <!-- ARCHIVOS PARA PWA -->
+    <!-- ==================== -->
+    
+    <!-- Service Worker -->
+    <script>
+        // Service Worker para funcionalidad offline
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(registration => {
+                    console.log('ServiceWorker registrado con éxito:', registration.scope);
+                }).catch(error => {
+                    console.log('Error al registrar ServiceWorker:', error);
+                });
+            });
+        }
+        
+        // Detectar si es móvil
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        // Variables para la instalación
+        let deferredPrompt;
+        const installButton = document.getElementById('installButton');
+        const installBanner = document.getElementById('installBanner');
+        const bannerInstall = document.getElementById('bannerInstall');
+        const bannerCancel = document.getElementById('bannerCancel');
+        
+        // Mostrar botón de instalación cuando sea posible
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Mostrar botón de instalación después de 5 segundos
+            setTimeout(() => {
+                if (isMobile && !isStandalone()) {
+                    installButton.classList.remove('hidden');
+                }
+            }, 5000);
+            
+            // Mostrar banner en móviles
+            if (isMobile && !isStandalone()) {
+                setTimeout(() => {
+                    installBanner.classList.add('active');
+                }, 10000); // Mostrar después de 10 segundos
+            }
+        });
+        
+        // Instalar app desde botón
+        installButton.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`User response to the install prompt: ${outcome}`);
+                deferredPrompt = null;
+                installButton.classList.add('hidden');
+                installBanner.classList.remove('active');
+            }
+        });
+        
+        // Instalar app desde banner
+        bannerInstall.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`User response to the install prompt: ${outcome}`);
+                deferredPrompt = null;
+                installButton.classList.add('hidden');
+                installBanner.classList.remove('active');
+            }
+        });
+        
+        // Cancelar banner
+        bannerCancel.addEventListener('click', () => {
+            installBanner.classList.remove('active');
+            // No mostrar de nuevo en esta sesión
+            sessionStorage.setItem('bannerDismissed', 'true');
+        });
+        
+        // Verificar si la app ya está instalada
+        function isStandalone() {
+            return (window.matchMedia('(display-mode: standalone)').matches) || 
+                   (window.navigator.standalone) || 
+                   (document.referrer.includes('android-app://'));
+        }
+        
+        // Si ya está instalada, ocultar botones
+        if (isStandalone()) {
+            installButton.classList.add('hidden');
+            installBanner.classList.remove('active');
+        }
+        
+        // Cerrar banner si ya fue descartado en esta sesión
+        if (sessionStorage.getItem('bannerDismissed') === 'true') {
+            installBanner.classList.remove('active');
+        }
+    </script>
+
+    <!-- ==================== -->
+    <!-- CÓDIGO DEL JUEGO -->
+    <!-- ==================== -->
+    
+    <script>
+        // ============================================
+        // BASE DE DATOS DE VOCABULARIO
+        // ============================================
+        
+        const vocabularyDB = {
+            casa: {
+                name: "Casa",
+                description: "Objetos y partes de la casa",
+                icon: "fas fa-home",
+                words: [
+                    { portuguese: "a janela", spanish: "la ventana", emoji: "🪟", image: "fa-window-maximize" },
+                    { portuguese: "a porta", spanish: "la puerta", emoji: "🚪", image: "fa-door-closed" },
+                    { portuguese: "a mesa", spanish: "la mesa", emoji: "🪑", image: "fa-table" },
+                    { portuguese: "a cadeira", spanish: "la silla", emoji: "💺", image: "fa-chair" },
+                    { portuguese: "o sofá", spanish: "el sofá", emoji: "🛋️", image: "fa-couch" },
+                    { portuguese: "a cama", spanish: "la cama", emoji: "🛏️", image: "fa-bed" },
+                    { portuguese: "o armário", spanish: "el armario", emoji: "🚪", image: "fa-archive" },
+                    { portuguese: "o fogão", spanish: "la estufa", emoji: "🔥", image: "fa-fire" },
+                    { portuguese: "a geladeira", spanish: "el refrigerador", emoji: "🧊", image: "fa-snowflake" },
+                    { portuguese: "a pia", spanish: "el fregadero", emoji: "🚰", image: "fa-faucet" },
+                    { portuguese: "o banheiro", spanish: "el baño", emoji: "🚽", image: "fa-toilet" },
+                    { portuguese: "o chuveiro", spanish: "la ducha", emoji: "🚿", image: "fa-shower" },
+                    { portuguese: "o espelho", spanish: "el espejo", emoji: "🪞", image: "fa-mirror" },
+                    { portuguese: "a escada", spanish: "la escalera", emoji: "🪜", image: "fa-stairs" },
+                    { portuguese: "a lâmpada", spanish: "la lámpara", emoji: "💡", image: "fa-lightbulb" },
+                    { portuguese: "o telefone", spanish: "el teléfono", emoji: "📞", image: "fa-phone" },
+                    { portuguese: "a televisão", spanish: "el televisor", emoji: "📺", image: "fa-tv" },
+                    { portuguese: "o computador", spanish: "el computador", emoji: "💻", image: "fa-computer" },
+                    { portuguese: "a estante", spanish: "el estante", emoji: "📚", image: "fa-books" },
+                    { portuguese: "o tapete", spanish: "la alfombra", emoji: "🧶", image: "fa-rug" }
+                ],
+                expressions: [
+                    { portuguese: "Bem-vindo à casa!", spanish: "¡Bienvenido a la casa!", emoji: "👋", image: "fa-hand-wave" },
+                    { portuguese: "Entre, por favor!", spanish: "¡Entre, por favor!", emoji: "👉", image: "fa-hand-point-right" },
+                    { portuguese: "Fique à vontade!", spanish: "¡Siéntase como en casa!", emoji: "😊", image: "fa-smile" }
+                ]
+            },
+            escola: {
+                name: "Escuela",
+                description: "Objetos y personas de la escuela",
+                icon: "fas fa-school",
+                words: [
+                    { portuguese: "o aluno", spanish: "el alumno", emoji: "👨‍🎓", image: "fa-user-graduate" },
+                    { portuguese: "a professora", spanish: "la profesora", emoji: "👩‍🏫", image: "fa-chalkboard-teacher" },
+                    { portuguese: "o livro", spanish: "el libro", emoji: "📖", image: "fa-book" },
+                    { portuguese: "o caderno", spanish: "el cuaderno", emoji: "📓", image: "fa-notebook" },
+                    { portuguese: "o lápis", spanish: "el lápiz", emoji: "✏️", image: "fa-pencil-alt" },
+                    { portuguese: "a caneta", spanish: "la pluma", emoji: "🖊️", image: "fa-pen" },
+                    { portuguese: "a borracha", spanish: "la goma de borrar", emoji: "🧽", image: "fa-eraser" },
+                    { portuguese: "a mochila", spanish: "la mochila", emoji: "🎒", image: "fa-backpack" },
+                    { portuguese: "a sala de aula", spanish: "el salón de clases", emoji: "🏫", image: "fa-chalkboard" },
+                    { portuguese: "o quadro", spanish: "el pizarrón", emoji: "📋", image: "fa-chalkboard" },
+                    { portuguese: "a cadeira escolar", spanish: "la silla escolar", emoji: "🪑", image: "fa-chair-school" }
+                ],
+                expressions: [
+                    { portuguese: "Bom dia, professor!", spanish: "¡Buenos días, profesor!", emoji: "👋", image: "fa-hand-spock" },
+                    { portuguese: "Posso ir ao banheiro?", spanish: "¿Puedo ir al baño?", emoji: "🙋", image: "fa-hand-paper" }
+                ]
+            },
+            familia: {
+                name: "Familia",
+                description: "Miembros de la familia",
+                icon: "fas fa-users",
+                words: [
+                    { portuguese: "a mãe", spanish: "la madre", emoji: "👩", image: "fa-female" },
+                    { portuguese: "o pai", spanish: "el padre", emoji: "👨", image: "fa-male" },
+                    { portuguese: "o irmão", spanish: "el hermano", emoji: "👦", image: "fa-child" },
+                    { portuguese: "a irmã", spanish: "la hermana", emoji: "👧", image: "fa-child" },
+                    { portuguese: "o avô", spanish: "el abuelo", emoji: "👴", image: "fa-user-alt" },
+                    { portuguese: "a avó", spanish: "la abuela", emoji: "👵", image: "fa-user-alt" }
+                ],
+                expressions: [
+                    { portuguese: "Eu te amo, família!", spanish: "¡Los amo, familia!", emoji: "❤️", image: "fa-heart" }
+                ]
+            },
+            animais: {
+                name: "Animales",
+                description: "Animales domésticos y salvajes",
+                icon: "fas fa-paw",
+                words: [
+                    { portuguese: "o cachorro", spanish: "el perro", emoji: "🐕", image: "fa-dog" },
+                    { portuguese: "o gato", spanish: "el gato", emoji: "🐈", image: "fa-cat" },
+                    { portuguese: "o pássaro", spanish: "el pájaro", emoji: "🐦", image: "fa-dove" },
+                    { portuguese: "o peixe", spanish: "el pez", emoji: "🐠", image: "fa-fish" }
+                ],
+                expressions: []
+            },
+            frutas: {
+                name: "Frutas",
+                description: "Frutas comunes y tropicales",
+                icon: "fas fa-apple-alt",
+                words: [
+                    { portuguese: "a maçã", spanish: "la manzana", emoji: "🍎", image: "fa-apple-alt" },
+                    { portuguese: "a banana", spanish: "el plátano", emoji: "🍌", image: "fa-banana" },
+                    { portuguese: "a laranja", spanish: "la naranja", emoji: "🍊", image: "fa-orange" },
+                    { portuguese: "o abacaxi", spanish: "la piña", emoji: "🍍", image: "fa-pineapple" }
+                ],
+                expressions: []
+            }
+        };
+
+        // ============================================
+        // CONFIGURACIÓN DEL JUEGO
+        // ============================================
+        
+        const gameConfig = {
+            levels: [
+                { pairs: 8, difficulty: "Fácil", gridClass: "board-8" },
+                { pairs: 12, difficulty: "Intermedio", gridClass: "board-12" },
+                { pairs: 16, difficulty: "Difícil", gridClass: "board-16" }
+            ],
+            journeyStages: [
+                { category: "casa", position: { x: 10, y: 50 } },
+                { category: "escola", position: { x: 30, y: 30 } },
+                { category: "familia", position: { x: 50, y: 50 } },
+                { category: "animais", position: { x: 70, y: 30 } },
+                { category: "frutas", position: { x: 90, y: 50 } }
+            ]
+        };
+
+        // ============================================
+        // ESTADO DEL JUEGO
+        // ============================================
+        
+        let gameState = {
+            currentScreen: "home",
+            currentCategory: null,
+            currentLevel: null,
+            currentGame: {
+                cards: [],
+                flippedCards: [],
+                matchedPairs: 0,
+                moves: 0,
+                startTime: null,
+                timerInterval: null,
+                totalPairs: 0
+            },
+            playerProgress: {
+                unlockedCategories: ["casa"],
+                completedLevels: {},
+                stats: {
+                    totalWords: 0,
+                    totalTime: 0,
+                    levelsCompleted: 0
+                }
+            },
+            settings: {
+                soundEnabled: true
+            }
+        };
+
+        // ============================================
+        // FUNCIONES DE INICIALIZACIÓN
+        // ============================================
+        
+        // Cargar estado del juego desde localStorage
+        function loadGameState() {
+            const savedState = localStorage.getItem('brasilMemoriaState');
+            if (savedState) {
+                const parsed = JSON.parse(savedState);
+                gameState.playerProgress = parsed.playerProgress || gameState.playerProgress;
+                gameState.settings = parsed.settings || gameState.settings;
+            }
+        }
+
+        // Guardar estado del juego en localStorage
+        function saveGameState() {
+            localStorage.setItem('brasilMemoriaState', JSON.stringify({
+                playerProgress: gameState.playerProgress,
+                settings: gameState.settings
+            }));
+        }
+
+        // Inicializar la aplicación
+        function initApp() {
+            loadGameState();
+            setupEventListeners();
+            renderCategories();
+            renderJourneyMap();
+            updateStats();
+            showScreen('home');
+            
+            // Configurar eventos táctiles
+            setupTouchEvents();
+        }
+
+        // Configurar eventos táctiles para móviles
+        function setupTouchEvents() {
+            // Prevenir zoom con doble toque
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function(event) {
+                const now = (new Date()).getTime();
+                if (now - lastTouchEnd <= 300) {
+                    event.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, false);
+            
+            // Prevenir menú contextual en toque largo
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+            });
+        }
+
+        // ============================================
+        // FUNCIONES DE INTERFAZ
+        // ============================================
+        
+        // Mostrar una pantalla específica
+        function showScreen(screenId) {
+            // Ocultar todas las pantallas
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            // Mostrar la pantalla solicitada
+            const screenElement = document.getElementById(`${screenId}-screen`);
+            if (screenElement) {
+                screenElement.classList.add('active');
+                gameState.currentScreen = screenId;
+            }
+            
+            // Actualizar botones de navegación activos
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if (btn.dataset.screen === screenId) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        // Renderizar categorías
+        function renderCategories() {
+            const container = document.getElementById('categories-container');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            Object.keys(vocabularyDB).forEach(categoryId => {
+                const category = vocabularyDB[categoryId];
+                const isUnlocked = gameState.playerProgress.unlockedCategories.includes(categoryId);
+                const completedLevels = gameState.playerProgress.completedLevels[categoryId] || 0;
+                
+                const card = document.createElement('div');
+                card.className = `category-card ${isUnlocked ? '' : 'locked'}`;
+                if (isUnlocked) {
+                    card.onclick = () => showLevels(categoryId);
+                    card.ontouchstart = (e) => {
+                        e.preventDefault();
+                        showLevels(categoryId);
+                    };
+                }
+                
+                card.innerHTML = `
+                    <div class="category-icon">
+                        <i class="${category.icon}"></i>
+                    </div>
+                    <h3>${category.name}</h3>
+                    <p>${category.description}</p>
+                    <div class="category-info">
+                        <div class="category-status">
+                            ${completedLevels}/3 niveles
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        // Renderizar mapa del viaje
+        function renderJourneyMap() {
+            const map = document.getElementById('journey-map');
+            if (!map) return;
+            
+            map.innerHTML = '';
+            
+            // Crear el camino
+            const path = document.createElement('div');
+            path.className = 'journey-path';
+            path.style.width = '80%';
+            path.style.left = '10%';
+            path.style.top = '50%';
+            map.appendChild(path);
+            
+            // Crear los puntos del viaje
+            gameConfig.journeyStages.forEach((stage, index) => {
+                const category = vocabularyDB[stage.category];
+                const isUnlocked = gameState.playerProgress.unlockedCategories.includes(stage.category);
+                const isActive = stage.category === gameState.playerProgress.unlockedCategories[0];
+                
+                const point = document.createElement('div');
+                point.className = `journey-point ${isUnlocked ? (isActive ? 'active' : '') : 'locked'}`;
+                point.style.left = `${stage.position.x}%`;
+                point.style.top = `${stage.position.y}%`;
+                
+                if (isUnlocked) {
+                    point.onclick = () => {
+                        gameState.currentCategory = stage.category;
+                        showLevels(stage.category);
+                    };
+                    point.ontouchstart = (e) => {
+                        e.preventDefault();
+                        gameState.currentCategory = stage.category;
+                        showLevels(stage.category);
+                    };
+                }
+                
+                point.innerHTML = `
+                    <i class="${category.icon}"></i>
+                    <div style="position: absolute; bottom: -25px; left: 0; right: 0; font-size: 0.8rem; color: ${isUnlocked ? 'var(--accent)' : '#666'};">
+                        ${index + 1}
+                    </div>
+                `;
+                
+                map.appendChild(point);
+            });
+        }
+
+        // Mostrar niveles de una categoría
+        function showLevels(categoryId) {
+            const category = vocabularyDB[categoryId];
+            gameState.currentCategory = categoryId;
+            
+            // Actualizar título y descripción
+            document.getElementById('levels-title').textContent = category.name;
+            document.getElementById('levels-description').textContent = category.description;
+            
+            // Renderizar niveles
+            const container = document.getElementById('levels-container');
+            container.innerHTML = '';
+            
+            gameConfig.levels.forEach((level, index) => {
+                const levelNumber = index + 1;
+                const isUnlocked = gameState.playerProgress.unlockedCategories.includes(categoryId);
+                const completedLevels = gameState.playerProgress.completedLevels[categoryId] || 0;
+                const isLevelUnlocked = isUnlocked && (index === 0 || completedLevels >= index);
+                
+                const card = document.createElement('div');
+                card.className = `level-card ${isLevelUnlocked ? '' : 'locked'}`;
+                
+                if (isLevelUnlocked) {
+                    card.onclick = () => startGame(categoryId, index);
+                    card.ontouchstart = (e) => {
+                        e.preventDefault();
+                        startGame(categoryId, index);
+                    };
+                }
+                
+                // Calcular estrellas ganadas
+                const levelKey = `${categoryId}-${index}`;
+                const stars = gameState.playerProgress.completedLevels[levelKey] || 0;
+                
+                card.innerHTML = `
+                    <div class="level-number">${levelNumber}</div>
+                    <h3>${level.difficulty}</h3>
+                    <p>${level.pairs} pares de cartas</p>
+                    <div class="level-difficulty">
+                        ${Array(3).fill().map((_, i) => 
+                            `<div class="difficulty-dot ${i < levelNumber ? 'active' : ''}"></div>`
+                        ).join('')}
+                    </div>
+                    <div class="level-stars">
+                        ${Array(3).fill().map((_, i) => 
+                            `<i class="fas fa-star ${i < stars ? '' : 'far'}"></i>`
+                        ).join('')}
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+            
+            showScreen('levels');
+        }
+
+        // ============================================
+        // FUNCIONES DEL JUEGO
+        // ============================================
+        
+        // Iniciar un nuevo juego
+        function startGame(categoryId, levelIndex) {
+            gameState.currentCategory = categoryId;
+            gameState.currentLevel = levelIndex;
+            
+            const category = vocabularyDB[categoryId];
+            const level = gameConfig.levels[levelIndex];
+            
+            // Preparar las cartas
+            const allWords = [...category.words, ...category.expressions];
+            const selectedWords = getRandomElements(allWords, level.pairs);
+            
+            // Duplicar para hacer pares
+            const cardsData = [...selectedWords, ...selectedWords];
+            
+            // Mezclar las cartas
+            shuffleArray(cardsData);
+            
+            // Crear el estado del juego
+            gameState.currentGame = {
+                cards: cardsData.map((word, index) => ({
+                    id: index,
+                    word: word,
+                    isFlipped: false,
+                    isMatched: false
+                })),
+                flippedCards: [],
+                matchedPairs: 0,
+                moves: 0,
+                startTime: Date.now(),
+                timerInterval: null,
+                totalPairs: level.pairs
+            };
+            
+            // Renderizar el tablero
+            renderGameBoard();
+            
+            // Actualizar contadores
+            updateGameCounters();
+            
+            // Iniciar temporizador
+            startTimer();
+            
+            // Mostrar pantalla de juego
+            showScreen('game');
+            
+            // Aplicar clase de tamaño al tablero
+            const gameBoard = document.getElementById('game-board');
+            gameBoard.className = `game-board ${level.gridClass}`;
+        }
+
+        // Renderizar el tablero de juego
+        function renderGameBoard() {
+            const board = document.getElementById('game-board');
+            if (!board) return;
+            
+            board.innerHTML = '';
+            
+            gameState.currentGame.cards.forEach(card => {
+                const cardElement = document.createElement('div');
+                cardElement.className = `card ${card.isFlipped ? 'flipped' : ''} ${card.isMatched ? 'matched' : ''}`;
+                cardElement.dataset.id = card.id;
+                
+                cardElement.innerHTML = `
+                    <div class="card-inner">
+                        <div class="card-front">
+                            <div class="card-image">
+                                <i class="fas fa-question"></i>
+                            </div>
+                            <div class="card-word">?</div>
+                            <div style="font-size: 0.9rem; color: #666;">Toca para voltear</div>
+                        </div>
+                        <div class="card-back">
+                            <div class="card-image">
+                                <i class="fas ${card.word.image}"></i>
+                            </div>
+                            <div class="card-word">${card.word.portuguese}</div>
+                            <div class="card-translation">${card.word.spanish}</div>
+                            <button class="card-audio" onclick="speakWord('${card.word.portuguese}')">
+                                <i class="fas fa-volume-up"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                cardElement.onclick = () => flipCard(card.id);
+                cardElement.ontouchstart = (e) => {
+                    e.preventDefault();
+                    flipCard(card.id);
+                };
+                
+                board.appendChild(cardElement);
+            });
+        }
+
+        // Voltear una carta
+        function flipCard(cardId) {
+            const game = gameState.currentGame;
+            const card = game.cards.find(c => c.id === cardId);
+            
+            // Validaciones
+            if (!card || card.isFlipped || card.isMatched || game.flippedCards.length >= 2) {
+                return;
+            }
+            
+            // Voltear la carta
+            card.isFlipped = true;
+            game.flippedCards.push(card);
+            
+            // Reproducir audio de la palabra
+            if (gameState.settings.soundEnabled) {
+                speakWord(card.word.portuguese);
+            }
+            
+            // Actualizar la vista
+            renderGameBoard();
+            
+            // Si hay dos cartas volteadas, verificar si hacen match
+            if (game.flippedCards.length === 2) {
+                game.moves++;
+                updateGameCounters();
+                
+                setTimeout(checkForMatch, 800);
+            }
+        }
+
+        // Verificar si las cartas volteadas hacen match
+        function checkForMatch() {
+            const game = gameState.currentGame;
+            const [card1, card2] = game.flippedCards;
+            
+            if (card1.word.portuguese === card2.word.portuguese) {
+                // ¡Match!
+                card1.isMatched = true;
+                card2.isMatched = true;
+                game.matchedPairs++;
+                
+                // Verificar si el juego ha terminado
+                if (game.matchedPairs === game.totalPairs) {
+                    endGame();
+                }
+            } else {
+                // No match, voltear de nuevo
+                card1.isFlipped = false;
+                card2.isFlipped = false;
+            }
+            
+            // Limpiar cartas volteadas
+            game.flippedCards = [];
+            
+            // Actualizar la vista
+            renderGameBoard();
+            updateGameCounters();
+        }
+
+        // Actualizar contadores del juego
+        function updateGameCounters() {
+            const game = gameState.currentGame;
+            
+            document.getElementById('moves-counter').textContent = game.moves;
+            document.getElementById('matches-counter').textContent = game.matchedPairs;
+        }
+
+        // Iniciar temporizador
+        function startTimer() {
+            const game = gameState.currentGame;
+            
+            // Limpiar temporizador anterior si existe
+            if (game.timerInterval) {
+                clearInterval(game.timerInterval);
+            }
+            
+            // Actualizar el tiempo cada segundo
+            game.timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - game.startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+                const seconds = (elapsed % 60).toString().padStart(2, '0');
+                document.getElementById('timer').textContent = `${minutes}:${seconds}`;
+            }, 1000);
+        }
+
+        // Terminar el juego
+        function endGame() {
+            const game = gameState.currentGame;
+            
+            // Detener el temporizador
+            clearInterval(game.timerInterval);
+            
+            // Calcular tiempo transcurrido
+            const elapsedSeconds = Math.floor((Date.now() - game.startTime) / 1000);
+            const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
+            const seconds = (elapsedSeconds % 60).toString().padStart(2, '0');
+            
+            // Calcular puntuación y estrellas
+            const maxMoves = game.totalPairs * 3;
+            const moveScore = Math.max(0, 100 - (game.moves / maxMoves) * 100);
+            const timeScore = Math.max(0, 100 - (elapsedSeconds / (game.totalPairs * 10)) * 100);
+            const totalScore = Math.round((moveScore + timeScore) / 2);
+            
+            let stars = 1;
+            if (totalScore >= 80) stars = 3;
+            else if (totalScore >= 60) stars = 2;
+            
+            // Actualizar progreso del jugador
+            const levelKey = `${gameState.currentCategory}-${gameState.currentLevel}`;
+            gameState.playerProgress.completedLevels[levelKey] = Math.max(
+                stars,
+                gameState.playerProgress.completedLevels[levelKey] || 0
+            );
+            
+            // Desbloquear siguiente nivel si es necesario
+            const currentCompleted = gameState.playerProgress.completedLevels[gameState.currentCategory] || 0;
+            if (gameState.currentLevel === currentCompleted) {
+                gameState.playerProgress.completedLevels[gameState.currentCategory] = currentCompleted + 1;
+                
+                // Desbloquear siguiente categoría si se completaron todos los niveles
+                if (currentCompleted + 1 === 3) {
+                    const categoryIndex = Object.keys(vocabularyDB).indexOf(gameState.currentCategory);
+                    if (categoryIndex < Object.keys(vocabularyDB).length - 1) {
+                        const nextCategory = Object.keys(vocabularyDB)[categoryIndex + 1];
+                        if (!gameState.playerProgress.unlockedCategories.includes(nextCategory)) {
+                            gameState.playerProgress.unlockedCategories.push(nextCategory);
+                        }
+                    }
+                }
+            }
+            
+            // Actualizar estadísticas
+            gameState.playerProgress.stats.levelsCompleted++;
+            gameState.playerProgress.stats.totalWords += game.totalPairs;
+            gameState.playerProgress.stats.totalTime += elapsedSeconds;
+            
+            // Guardar estado
+            saveGameState();
+            
+            // Mostrar pantalla de resultados
+            showResults(elapsedSeconds, game.moves, totalScore, stars);
+        }
+
+        // Mostrar resultados
+        function showResults(timeElapsed, moves, score, stars) {
+            const minutes = Math.floor(timeElapsed / 60).toString().padStart(2, '0');
+            const seconds = (timeElapsed % 60).toString().padStart(2, '0');
+            
+            document.getElementById('final-time').textContent = `${minutes}:${seconds}`;
+            document.getElementById('final-moves').textContent = moves;
+            document.getElementById('final-score').textContent = score;
+            
+            // Mostrar estrellas
+            const starsElement = document.getElementById('stars-earned');
+            starsElement.innerHTML = '';
+            for (let i = 0; i < 3; i++) {
+                const star = document.createElement('i');
+                star.className = `fas fa-star ${i < stars ? '' : 'far'}`;
+                star.style.fontSize = '3rem';
+                star.style.margin = '0 5px';
+                starsElement.appendChild(star);
+            }
+            
+            // Mensaje según puntuación
+            const messageElement = document.getElementById('results-message');
+            let message = '';
+            if (stars === 3) {
+                message = '¡Excelente! Dominaste este nivel perfectamente.';
+            } else if (stars === 2) {
+                message = '¡Muy bien! Sigue practicando para mejorar.';
+            } else {
+                message = '¡Buen trabajo! Sigue intentándolo para obtener más estrellas.';
+            }
+            messageElement.textContent = message;
+            
+            showScreen('results');
+        }
+
+        // ============================================
+        // FUNCIONES DE UTILIDAD
+        // ============================================
+        
+        // Obtener elementos aleatorios de un array
+        function getRandomElements(array, count) {
+            const shuffled = [...array].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, count);
+        }
+
+        // Mezclar un array
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Pronunciar una palabra usando síntesis de voz
+        function speakWord(text) {
+            if (!gameState.settings.soundEnabled) return;
+            
+            // Intentar usar voz en portugués brasileño
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'pt-BR';
+            utterance.rate = 0.8;
+            
+            // Buscar voces en portugués
+            const voices = speechSynthesis.getVoices();
+            const portugueseVoice = voices.find(voice => 
+                voice.lang === 'pt-BR' || voice.lang.startsWith('pt-')
+            );
+            
+            if (portugueseVoice) {
+                utterance.voice = portugueseVoice;
+            }
+            
+            speechSynthesis.speak(utterance);
+        }
+
+        // Actualizar estadísticas
+        function updateStats() {
+            document.getElementById('total-words').textContent = gameState.playerProgress.stats.totalWords;
+            document.getElementById('levels-completed').textContent = gameState.playerProgress.stats.levelsCompleted;
+            
+            const totalSeconds = gameState.playerProgress.stats.totalTime;
+            const hours = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
+            const minutes = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
+            document.getElementById('total-time').textContent = `${hours}:${minutes}`;
+            
+            // Actualizar progreso por categoría
+            const progressContainer = document.getElementById('category-progress');
+            progressContainer.innerHTML = '';
+            
+            Object.keys(vocabularyDB).forEach(categoryId => {
+                const category = vocabularyDB[categoryId];
+                const completedLevels = gameState.playerProgress.completedLevels[categoryId] || 0;
+                const progress = (completedLevels / 3) * 100;
+                
+                const progressBar = document.createElement('div');
+                progressBar.style.marginBottom = '15px';
+                progressBar.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>${category.name}</span>
+                        <span>${completedLevels}/3 niveles</span>
+                    </div>
+                    <div style="height: 10px; background-color: #eee; border-radius: 5px; overflow: hidden;">
+                        <div style="height: 100%; width: ${progress}%; background-color: var(--primary); border-radius: 5px;"></div>
+                    </div>
+                `;
+                
+                progressContainer.appendChild(progressBar);
+            });
+        }
+
+        // ============================================
+        // CONFIGURACIÓN DE EVENTOS
+        // ============================================
+        
+        function setupEventListeners() {
+            // Navegación principal
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    showScreen(btn.dataset.screen);
+                });
+                btn.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    showScreen(btn.dataset.screen);
+                });
+            });
+            
+            // Tarjetas de modo
+            document.querySelectorAll('.mode-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    showScreen(card.dataset.screen);
+                });
+                card.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    showScreen(card.dataset.screen);
+                });
+            });
+            
+            // Botón continuar viaje
+            document.getElementById('continue-journey')?.addEventListener('click', () => {
+                // Encontrar la primera categoría no completada
+                let targetCategory = gameState.playerProgress.unlockedCategories[0];
+                if (targetCategory) {
+                    gameState.currentCategory = targetCategory;
+                    showLevels(targetCategory);
+                }
+            });
+            
+            // Botón volver a categorías
+            document.getElementById('back-to-categories')?.addEventListener('click', () => {
+                showScreen('categories');
+            });
+            
+            // Botones de control del juego
+            document.getElementById('hint-btn')?.addEventListener('click', giveHint);
+            document.getElementById('restart-btn')?.addEventListener('click', restartGame);
+            document.getElementById('quit-btn')?.addEventListener('click', quitGame);
+            
+            // Botones de resultados
+            document.getElementById('play-again-btn')?.addEventListener('click', () => {
+                startGame(gameState.currentCategory, gameState.currentLevel);
+            });
+            
+            document.getElementById('next-level-btn')?.addEventListener('click', () => {
+                if (gameState.currentLevel < 2) {
+                    startGame(gameState.currentCategory, gameState.currentLevel + 1);
+                } else {
+                    showScreen('levels');
+                }
+            });
+            
+            document.getElementById('back-to-levels-btn')?.addEventListener('click', () => {
+                showScreen('levels');
+            });
+            
+            // Inicializar síntesis de voz
+            if ('speechSynthesis' in window) {
+                // Algunos navegadores necesitan que se carguen las voces
+                speechSynthesis.onvoiceschanged = () => {
+                    console.log('Voces de síntesis cargadas');
+                };
+            }
+        }
+
+        // Dar una pista al jugador
+        function giveHint() {
+            const game = gameState.currentGame;
+            const unmatchedCards = game.cards.filter(card => !card.isMatched && !card.isFlipped);
+            
+            if (unmatchedCards.length >= 2) {
+                // Mostrar temporalmente dos cartas
+                unmatchedCards[0].isFlipped = true;
+                unmatchedCards[1].isFlipped = true;
+                
+                renderGameBoard();
+                
+                // Ocultar después de un segundo
+                setTimeout(() => {
+                    unmatchedCards[0].isFlipped = false;
+                    unmatchedCards[1].isFlipped = false;
+                    renderGameBoard();
+                }, 1000);
+            }
+        }
+
+        // Reiniciar el juego actual
+        function restartGame() {
+            if (gameState.currentCategory !== null && gameState.currentLevel !== null) {
+                startGame(gameState.currentCategory, gameState.currentLevel);
+            }
+        }
+
+        // Salir del juego actual
+        function quitGame() {
+            // Detener temporizador
+            clearInterval(gameState.currentGame.timerInterval);
+            
+            // Volver a niveles
+            showScreen('levels');
+        }
+
+        // ============================================
+        // INICIALIZACIÓN
+        // ============================================
+        
+        // Esperar a que el DOM esté cargado
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
